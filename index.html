@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Motjos Incidentenregister</title>
+  <style>
+    :root{
+      --blue:#154273;
+      --light:#eef3f8;
+      --accent:#007bc7;
+      --accent-soft:#e6f2fb;
+      --card:#ffffff;
+      --text:#1a1a1a;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Arial, sans-serif}
+
+    body{background:var(--light);color:var(--text)}
+
+    header{
+      background:var(--blue);
+      color:white;
+      padding:20px 30px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    header span{opacity:0.8;font-size:14px}
+
+    .container{max-width:1000px;margin:30px auto;padding:20px}
+
+    h1{margin-bottom:15px}
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+      gap:18px;
+    }
+
+    /* 🔥 INCIDENT CARDS UPGRADE */
+    .incident{
+      background:var(--card);
+      border-radius:14px;
+      padding:18px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.08);
+      cursor:pointer;
+      transition:all 0.25s ease;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .incident::before{
+      content:"";
+      position:absolute;
+      top:0;left:0;
+      width:100%;
+      height:5px;
+      background:linear-gradient(90deg,var(--accent),#00aaff);
+    }
+
+    .incident:hover{
+      transform:translateY(-6px) scale(1.02);
+      box-shadow:0 12px 28px rgba(0,0,0,0.15);
+    }
+
+    .incident-title{
+      font-weight:bold;
+      font-size:16px;
+      margin-bottom:8px;
+    }
+
+    .incident-tag{
+      display:inline-block;
+      font-size:12px;
+      background:var(--accent-soft);
+      color:var(--accent);
+      padding:4px 8px;
+      border-radius:999px;
+    }
+
+    /* 👥 PEOPLE CARDS UPGRADE */
+    .people{margin-top:50px}
+
+    .person{
+      background:var(--card);
+      padding:18px;
+      border-radius:14px;
+      margin-bottom:12px;
+      box-shadow:0 6px 16px rgba(0,0,0,0.07);
+      transition:0.2s;
+      position:relative;
+    }
+
+    .person::after{
+      content:"";
+      position:absolute;
+      top:0;left:0;
+      width:4px;
+      height:100%;
+      background:var(--accent);
+      border-radius:4px 0 0 4px;
+    }
+
+    .person:hover{
+      transform:translateX(5px);
+      box-shadow:0 10px 22px rgba(0,0,0,0.12);
+    }
+
+    .person h3{margin-bottom:6px}
+
+    .person small{
+      color:#666;
+      font-size:12px;
+    }
+
+    /* MODAL */
+    .modal{
+      display:none;
+      position:fixed;
+      top:0;left:0;
+      width:100%;height:100%;
+      background:rgba(0,0,0,0.6);
+      justify-content:center;
+      align-items:center;
+    }
+
+    .modal-content{
+      background:white;
+      padding:25px;
+      max-width:500px;
+      border-radius:14px;
+      animation:fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0;transform:scale(0.95)}
+      to{opacity:1;transform:scale(1)}
+    }
+
+    .close{float:right;cursor:pointer;font-weight:bold;margin-bottom:10px}
+
+  </style>
+</head>
+<body>
+
+<header>
+  <div>Motjos Incidentenregister</div>
+  <span>Ministerie van Motjos Zaken</span>
+</header>
+
+<div class="container">
+  <h1>Overzicht Incidenten</h1>
+  <div id="incidentList" class="grid"></div>
+
+  <div class="people">
+    <h1>About People</h1>
+
+    <div class="person">
+      <h3>Zainy</h3>
+      <small>Main character</small>
+      <p>Betrokken bij meerdere incidents en lacht meestal alles kapot.</p>
+    </div>
+
+    <div class="person">
+      <h3>Nilaya</h3>
+      <small>Chaos bron</small>
+      <p>Komt in bijna elk incident voor en veroorzaakt 70% van de problemen.</p>
+    </div>
+
+    <div class="person">
+      <h3>Jim</h3>
+      <small>Bird owner</small>
+      <p>Heeft een vogel (Baljeet). Raakt vaak betrokken in random situaties.</p>
+    </div>
+
+    <div class="person">
+      <h3>Sim</h3>
+      <small>Victim energy</small>
+      <p>Slachtoffer van het vogelpoep incident. Gewoon pech honestly.</p>
+    </div>
+
+    <div class="person">
+      <h3>Jul</h3>
+      <small>Controversial</small>
+      <p>Vaak onvrijwillig onderdeel van incidents.</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">X</span>
+    <h2 id="modalTitle"></h2>
+    <p id="modalDesc"></p>
+  </div>
+</div>
+
+<script>
+let incidents = [
+  {title:"Vogelpoep incident",desc:"Een vogel poepte op Sim bij Utrecht CS voor de KFC. Nilaya zei dat het op een omelet leek."},
+  {title:"Jazzlyn primeminister of gayming incident",desc:"Jazzlyn beweerde de primeminister of gaming te zijn en zei: no school only gaming."},
+  {title:"tuhhhduhhh incident",desc:"Zainy & Nilaya zeiden dat Juls zo erg stonk dat er een 'tuhhhduhhh' geluid uit kwam."},
+  {title:"Baljeet incident",desc:"Jims vogel poepte op hem tijdens een facetime. Iedereen ging stuk."},
+  {title:"nilaya ishowtiet incident",desc:"Nilaya flashde de hele groep motjos."},
+  {title:"muur twerk incident",desc:"Deze incident is geblokkeerd wegens privacy redenen."},
+  {title:"jazzlyn muur incident",desc:"Jazzlyn leerde twerken op een muur terwijl familie keek."},
+  {title:"Nilaya snot incident",desc:"Er kwam snot uit Nilaya haar neus door lachen."},
+  {title:"nilaya natte trui pis incident",desc:"Nilaya leunde in de wc en werd nat."},
+  {title:"dubbel fris incident",desc:"Een pakje dubbelfris werd in het water gegooid."},
+  {title:"Jazzlyn mrs. rabbit incident",desc:"Jazzlyn viel en zei mrs rabbit has fainted."},
+  {title:"Jim armband incident",desc:"Jim kreeg een armband van een oudere vrouw en drama ontstond."},
+  {title:"nilaya strijkijzer incident",desc:"Een strijkijzer viel op Nilaya."}
+];
+
+function render(){
+  const list = document.getElementById("incidentList");
+  list.innerHTML="";
+
+  incidents.forEach((inc)=>{
+    const div=document.createElement("div");
+    div.className="incident";
+    div.innerHTML=`
+      <div class='incident-title'>${inc.title}</div>
+      <div class='incident-tag'>incident</div>
+    `;
+
+    div.onclick=()=>{
+      if(inc.title.toLowerCase().includes("muur twerk")){
+        alert("Deze incident is niet beschikbaar wegens privacy.");
+        return;
+      }
+      document.getElementById("modalTitle").innerText=inc.title;
+      document.getElementById("modalDesc").innerText=inc.desc;
+      document.getElementById("modal").style.display="flex";
+    }
+
+    list.appendChild(div);
+  })
+}
+
+function closeModal(){
+  document.getElementById("modal").style.display="none";
+}
+
+render();
+</script>
+
+</body>
+</html>
